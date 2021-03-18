@@ -3,21 +3,20 @@
 
 #include <linux/types.h>
 #include <linux/rculist.h>
+#include <linux/skbuff.h>
+#include <linux/net.h>
+#include <net/ip_tunnels.h>
+#include <linux/rtnetlink.h>
+#include <linux/slab.h>
 
-#include "vnode.h"
+#include "typedef.h"
 #include "phy_switcher.h"
+#include "vnode.h"
+#include "simulation/simulation.h"
 
-
-struct vport {
-	struct net_device *dev;
-	struct phy_switcher *phy_switcher;
-    
-    char *name;
-	int port_no;
-	struct hlist_node *hash_node;
-	struct rcu_head *rcu;
-    struct vnode *vnode;
-};
+void vport_received(struct sk_buff *skb, struct ip_tunnel_info *tun_info);
+// void vport_send(struct simulation_package *package);
+void vport_send(struct sk_buff *skb, struct vport* vport);
 
 //vport create and register to default phy_swithcer
 struct vport* vport_create(struct phy_switcher *phy_switcher);

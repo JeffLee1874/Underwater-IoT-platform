@@ -211,6 +211,8 @@
 // module_exit(module_hrtimer_exit);   
 
 
+
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/delay.h>
@@ -220,8 +222,16 @@
 #include <linux/ktime.h>
 #include <linux/kthread.h>
 
-#include "phy_switcher.h"
+#include "typedef.h"
 #include "vnode.h"
+#include "vport.h"
+#include "phy_switcher.h"
+
+
+
+
+
+
 // #include "cJSON.h"
 
 // #include <arch/x86/include/asm/current.h>
@@ -242,6 +252,7 @@ struct work my_work;
 struct work my_work2;
 struct timespec64 start;
 struct timespec64 end;
+struct phy_switcher* ps;
 
 unsigned long long diff_tv(struct timespec64 start, struct timespec64 end) 
 {
@@ -290,35 +301,139 @@ void work_test_func(struct work_struct *work)
     //queue_work(workqueue_test, &work_test);
 }
 
+// static int test_init(void)
+// {
+//     printk("Hello,world!\n");
 
+//     struct phy_switcher* ps = (struct phy_switcher*)kmalloc(sizeof(struct phy_switcher), GFP_KERNEL);
+//     if(!initialize_ps(ps, "UIOT", 8)){
+//         printk("----can't init phy_switcher");
+//         return 0;
+//     }
+//     printk("phy_switcher %s initialized!", ps->switcher_name);
+//     if(!ps->entry->first)
+//     {
+//         printk("empty");
+//     }
+//     struct vport* vport = (struct vport*)kmalloc(sizeof(struct vport), GFP_KERNEL);
+//     vport->name = "c 0";
+//     // vport->hash_node = (struct hlist_node* )kmalloc(sizeof(struct hlist_node), GFP_KERNEL);
+//     INIT_HLIST_NODE(&vport->hash_node);
+//     hlist_add_head(&vport->hash_node, ps->entry);
+
+//     int count = 0;
+
+//     struct hlist_node *hn;
+//     struct vport *v;
+//     printk("fuck1");
+
+//     for(hn = ps->entry->first; hn; hn = hn->next)
+//     {
+//         count++;
+//         printk("f %d", count);
+//         // vp = container_of(hn, typeof(*vp), hash_node);
+//         // struct vnode** v = &vn;
+//         v = container_of(hn, typeof(*v), hash_node);
+//         if(!v)
+//         {
+//             printk("v not found");
+//         }
+//         printk("now is %s || search for %s", v->name, "name");
+//         if(!strcmp(vport->name, "name"))
+//         {
+//             return 1;
+//         }
+//     }
+
+//     printk("count: %d", count);
+
+//     return 0;
+// }
 
 
 static int test_init(void)
 {
     printk("Hello,world!\n");
 
-    int err = 0;
-    struct vport *vp;
-    struct vnode *vn;
-    vp = (struct vport*)kmalloc(sizeof(struct vport), GFP_KERNEL);
+    // struct phy_switcher* ps = (struct phy_switcher*)kmalloc(sizeof(struct phy_switcher), GFP_KERNEL);
+    // if(!initialize_ps(ps, "UIOT", 8)){
+    //     printk("----can't init phy_switcher");
+    //     return 0;
+    // }
+    // printk("phy_switcher %s initialized!", ps->switcher_name);
+    // if(!ps->entry->first)
+    // {
+    //     printk("empty");
+    // }
+    // struct vport* vport = (struct vport*)kmalloc(sizeof(struct vport), GFP_KERNEL);
+    // vport->name = "c 0";
+    // struct vport* vport1 = (struct vport*)kmalloc(sizeof(struct vport), GFP_KERNEL);
+    // vport1->name = "c 1";
+    // INIT_HLIST_NODE(&vport->hash_node);
+    // hlist_add_head(&vport->hash_node, ps->entry);
+    // INIT_HLIST_NODE(&vport1->hash_node);
+    // hlist_add_head(&vport1->hash_node, ps->entry);
+
+    // int count = 0;
+
+    // struct hlist_node *hn;
+    // struct vport *v;
+    // printk("fuck1");
+
+    // for(hn = ps->entry->first; hn!=NULL; hn = hn->next)
+    // {
+    //     count++;
+    //     printk("f %d", count);
+    //     // vp = container_of(hn, typeof(*vp), hash_node);
+    //     // struct vnode** v = &vn;
+    //     vport1 = container_of(hn, typeof(*vport1), hash_node);
+    //     if(!vport1)
+    //     {
+    //         printk("v not found");
+    //     }
+    //     printk("now is %s || search for %s", vport1->name, "name");
+    //     // if(!strcmp(vport->name, "name"))
+    //     // {
+    //     //     printk()
+    //     //     return 1;
+    //     // }
+    // }
+
+    // printk("count: %d", count);
+    // printk("vport1 name: %s", vport1->name);
+
+    ps = (struct phy_switcher*)kmalloc(sizeof(struct phy_switcher), GFP_KERNEL);
+    if(!initialize_ps(ps, "UIOT", 8)){
+        printk("----can't init phy_switcher");
+        return 0;
+    }
+    printk("phy_switcher %s initialized!", ps->switcher_name);
+
+
+    struct vport *vp, *vp2;
+    struct vnode *vn, *vn2;
     vn = (struct vnode*)kmalloc(sizeof(struct vnode), GFP_KERNEL);
+    vn2 = (struct vnode*)kmalloc(sizeof(struct vnode), GFP_KERNEL);
 
-    err = vnode_register(vp, vn, "eth0");
-    printk("Finding netdevice %d\n", err);
 
-    char * jsonStr = "{\"semantic\":{\"slots\":{\"name\":\"张三\"}}, \"rc\":0, \"operation\":\"CALL\", \"service\":\"telephone\", \"text\":\"打电话给张三\"}";
-    cJSON * root = NULL;
-    cJSON * item = NULL;//cjson对象
+    vnode_register(vn, "tap0", ps, vp);
+    vnode_register(vn2, "tap1", ps, vp2);
+
+    
+
+    // char * jsonStr = "{\"semantic\":{\"slots\":{\"name\":\"张三\"}}, \"rc\":0, \"operation\":\"CALL\", \"service\":\"telephone\", \"text\":\"打电话给张三\"}";
+    // cJSON * root = NULL;
+    // cJSON * item = NULL;//cjson对象
  
-    root = cJSON_Parse(jsonStr); 
-    if (!root) 
-    {
-        printk("Error before: [%s]\n",cJSON_GetErrorPtr());
-    }
-    else{
-        printk("%s\n", "有格式的方式打印Json:");           
-        printk("%s\n\n", cJSON_Print(root));
-    }
+    // root = cJSON_Parse(jsonStr); 
+    // if (!root) 
+    // {
+    //     printk("Error before: [%s]\n",cJSON_GetErrorPtr());
+    // }
+    // else{
+    //     printk("%s\n", "有格式的方式打印Json:");           
+    //     printk("%s\n\n", cJSON_Print(root));
+    // }
 
     /* 1. 自己创建一个workqueue， 中间参数为0，默认配置 */
     workqueue_test = alloc_workqueue("workqueue_test", WQ_UNBOUND, 1);
@@ -350,6 +465,7 @@ static void test_exit(void)
 {
     printk("Goodbye,cruel world!\n");
     destroy_workqueue(workqueue_test);
+    unregister_all(ps);
 }
 
 module_init(test_init);
