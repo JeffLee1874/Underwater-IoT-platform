@@ -13,6 +13,7 @@ enum hrtimer_restart send(struct hrtimer *timer)
 }
 
 void start_simulate(struct work_struct* w){
+	printk("12333");
     struct work *work = container_of(w, typeof(*work), work_test);
 	struct vport *vport = work->vport;
     struct sk_buff *skb = work->skb;
@@ -29,13 +30,14 @@ void start_simulate(struct work_struct* w){
             continue;
         }
         printk("now is %s", to_vport->name);
-
-        delay = vport->phy_switcher->ops->compute(vport, to_vport);
+		
+		struct work *temp = (struct work *)kmalloc(sizeof(struct work), GFP_KERNEL);
+		temp->skb = skb_copy(skb, GFP_ATOMIC);
+        delay = vport->phy_switcher->ops->compute(vport, to_vport, temp->skb);
         if(delay > 0)
         {
-            struct work *temp = (struct work *)kmalloc(sizeof(struct work), GFP_KERNEL);
-			temp->skb = skb_copy(skb, GFP_ATOMIC);
-            temp->skb->dev = to_vport->vnode->dev;
+			// temp->skb = skb_copy(skb, GFP_ATOMIC);
+            // temp->skb->dev = to_vport->vnode->dev;
             printk("after computation, skb->dev is %s || %s", temp->skb->dev->name, to_vport->vnode->dev->name);
             
 			temp->data = "COMPLETE!";
@@ -77,9 +79,11 @@ void vport_received(struct sk_buff *skb, struct ip_tunnel_info *tun_info)
     struct work *work = (struct work*)kmalloc(sizeof(struct work), GFP_KERNEL);
 	work->skb = skb;
 	work->vport = vp;
+	
 	INIT_WORK(&work->work_test, start_simulate);
     /* 将自己的工作项添加到指定的工作队列去， 同时唤醒相应线程处理 */
     queue_work(vp->phy_switcher->ops->workqueue, &work->work_test);
+	printk("123");
 	return;
 error:
 	kfree_skb(skb);

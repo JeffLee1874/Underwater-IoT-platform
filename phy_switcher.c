@@ -135,6 +135,7 @@ int forward_device_create(char* forward_dev_name)
 int unregister_all(struct phy_switcher* ps){
     int err = 0;
     printk("search in phy_switcher: %s", ps->switcher_name);
+    // destroy_workqueue(ps->ops->workqueue);
     struct hlist_node *hn;
     // struct vport* vp;
     for(hn = ps->entry->first; hn!=NULL; hn = hn->next)

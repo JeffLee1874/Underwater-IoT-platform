@@ -10,6 +10,7 @@
 #include <linux/workqueue.h>
 
 
-int compute(struct vport* from, struct vport* to);
+int compute(struct vport* from, struct vport* to, struct sk_buff* new);
+// int compute(struct vport* from, struct vport* to);
 
 #endif

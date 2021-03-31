@@ -4,6 +4,7 @@
 #include <linux/types.h>
 #include <linux/rculist.h>
 #include <linux/list.h>
+#include <linux/workqueue.h>
 
 // #include "simulation/simulation.h"
 #include "typedef.h"
