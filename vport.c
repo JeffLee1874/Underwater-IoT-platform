@@ -1,12 +1,58 @@
 #include "vport.h"
 
+enum hrtimer_restart send(struct hrtimer *timer)
+{
+	printk("enter send func!!!!!!!!!!!!!");
+    struct work *work = container_of(timer, typeof(*work), hr_timer);
+    printk("to_device: %s", work->skb->dev->name);
+	vport_send(work->skb, NULL);
+
+    printk(KERN_ALERT "This line is printed after 1 seconds.\n");
+  
+    return HRTIMER_NORESTART;
+}
+
+void start_simulate(struct work_struct* w){
+    struct work *work = container_of(w, typeof(*work), work_test);
+	struct vport *vport = work->vport;
+    struct sk_buff *skb = work->skb;
+    
+    int delay = 0;
+    printk("who send this?  %s  || %s", skb->dev->name, vport->name);
+
+    struct hlist_node *hn;
+    struct vport* to_vport;
+    for(hn = vport->phy_switcher->entry->first; hn!=NULL; hn = hn->next)
+    {
+        to_vport = container_of(hn, typeof(*to_vport), hash_node);
+        if(!strcmp(to_vport->name, vport->name)){
+            continue;
+        }
+        printk("now is %s", to_vport->name);
+
+        delay = vport->phy_switcher->ops->compute(vport, to_vport);
+        if(delay > 0)
+        {
+            struct work *temp = (struct work *)kmalloc(sizeof(struct work), GFP_KERNEL);
+			temp->skb = skb_copy(skb, GFP_ATOMIC);
+            temp->skb->dev = to_vport->vnode->dev;
+            printk("after computation, skb->dev is %s || %s", temp->skb->dev->name, to_vport->vnode->dev->name);
+            
+			temp->data = "COMPLETE!";
+            hrtimer_init(&temp->hr_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+            temp->hr_timer.function = send;
+            hrtimer_start(&temp->hr_timer, ms_to_ktime(delay), HRTIMER_MODE_REL);
+			pid_t tid = get_current()->pid;
+			printk("pid=%u  ------  delay=%u ms", tid, delay);
+            // vport_send(new, to_vport);
+        }
+    }
+    kfree(skb);
+}
 
 void vport_received(struct sk_buff *skb, struct ip_tunnel_info *tun_info)
 {
-	// vport = netdev_get_vport(skb->dev);
-	// struct net_device **device = &skb->dev;
     struct vport *vp = (struct vport* )rcu_dereference_rtnl(skb->dev->rx_handler_data);
-	// search_vport_by_name(,sk->dev->name,vp);
 	if (unlikely(!vp))
     {
         printk("-----Can't find vport-----");
@@ -28,8 +74,12 @@ void vport_received(struct sk_buff *skb, struct ip_tunnel_info *tun_info)
 		skb_push(skb, ETH_HLEN);
 		skb_postpush_rcsum(skb, skb->data, ETH_HLEN);
 	}
-	
-	start_simulate(vp, skb);
+    struct work *work = (struct work*)kmalloc(sizeof(struct work), GFP_KERNEL);
+	work->skb = skb;
+	work->vport = vp;
+	INIT_WORK(&work->work_test, start_simulate);
+    /* 将自己的工作项添加到指定的工作队列去， 同时唤醒相应线程处理 */
+    queue_work(vp->phy_switcher->ops->workqueue, &work->work_test);
 	return;
 error:
 	kfree_skb(skb);
@@ -113,6 +163,7 @@ void vport_send(struct sk_buff *skb, struct vport* vport){
 	// }
 
 	// skb->dev = vport->vnode->dev;
+	printk("now in SEND FUNC, to_device: %s", skb->dev->name);
 	dev_queue_xmit(skb);
 	return;
 

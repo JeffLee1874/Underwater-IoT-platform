@@ -6,12 +6,10 @@
 #include "../vport.h"
 #include "../phy_switcher.h"
 #include <linux/slab.h>
+#include <linux/hrtimer.h>
+#include <linux/workqueue.h>
 
 
-void start_simulate(struct vport* vport, struct sk_buff *skb);
-void send(struct simulation_package *package);
-int compute(struct simulation_package *package);
-void receive(struct simulation_package *package);
-void package_free(struct simulation_package *package);
+int compute(struct vport* from, struct vport* to);
 
 #endif

@@ -29,9 +29,23 @@ int initialize_ps(struct phy_switcher* ps, char* name, int size){
     // hash_init(table);
 
     ps->entry = (struct hlist_head* )kmalloc(sizeof(struct hlist_head), GFP_KERNEL);
-
     INIT_HLIST_HEAD(ps->entry);
     
+    return 1;
+}
+
+int set_simulation_option(struct simulation_ops* ops, struct phy_switcher* ps){
+    if(!ops)
+    {
+        printk("simulation_ops is NULL!");
+        return 0;
+    }
+    if(!ps)
+    {
+        printk("phy_switcher is NULL!");
+        return 0;
+    }
+    ps->ops = ops;
     return 1;
 }
 

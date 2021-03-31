@@ -5,7 +5,7 @@
 #include <linux/rculist.h>
 #include <linux/list.h>
 
-#include "simulation/simulation.h"
+// #include "simulation/simulation.h"
 #include "typedef.h"
 #include "vport.h"
 
@@ -18,6 +18,7 @@
 int search_vport_by_name(struct phy_switcher* ps, char* name, struct vport* vport);
 int search_and_send(struct phy_switcher* ps, char* name, struct vport* vport, struct sk_buff* skb);
 int initialize_ps(struct phy_switcher* ps, char* name, int size);
+int set_simulation_option(struct simulation_ops* ops, struct phy_switcher* ps);
 
 u32 hash_name(const char *s);
 
