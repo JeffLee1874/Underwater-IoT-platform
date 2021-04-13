@@ -13,12 +13,12 @@ MODULE_LICENSE("Dual BSD/GPL");
 extern struct vmac_ops *mac_ptc_ops;
 
 // void vmac_contral(struct sk_buff* skb,struct tx_hrtimer *tx_h,struct net_device *dev){
-//     struct timespec time;
+//     struct timespec64 time;
 //     static ktime_t ktime;
 //     ktime = ms_to_ktime(INTERVAL);
 //     tx_h->skb = skb;
 //     //hrtimer_cancel(&tx_h->hr_timer);
-//     getnstimeofday(&time);
+//     ktime_get_ts64(&time);
 //     printk("<0>""hrtimer setting up:%9llu sec, %9lld ms, %9lld ns,send a packet\n",(unsigned long long) time.tv_sec,(unsigned long long) time.tv_sec*1000 + time.tv_nsec/1000000 ,(long long)time.tv_nsec);
 //     hrtimer_start(&tx_h->hr_timer, ktime, HRTIMER_MODE_REL );
 // }

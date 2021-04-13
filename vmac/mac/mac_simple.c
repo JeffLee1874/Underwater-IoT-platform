@@ -17,7 +17,7 @@ struct sk_buff *skb_rx = NULL;
 unsigned long skb_tx_time = 0;
 unsigned long skb_rx_time = 0;
 
-struct timespec stime;
+struct timespec64 stime;
 
 
 unsigned long txtime(struct sk_buff* skb,unsigned long bandwidth){ //return us
@@ -27,9 +27,9 @@ unsigned long txtime(struct sk_buff* skb,unsigned long bandwidth){ //return us
 }
 
 unsigned long expire(void){
-    struct timespec ctime;
+    struct timespec64 ctime;
     unsigned long t = 0;
-    getnstimeofday(&ctime);
+    ktime_get_ts64(&ctime);
     if(((unsigned long)((ctime.tv_nsec-stime.tv_nsec)/1000))<skb_rx_time){
         t = (skb_rx_time - (unsigned long)((ctime.tv_nsec-stime.tv_nsec)/1000));
     }
@@ -37,8 +37,8 @@ unsigned long expire(void){
 }
 
 unsigned long random(void){
-    struct timespec time;
-    getnstimeofday(&time);
+    struct timespec64 time;
+    ktime_get_ts64(&time);
     unsigned long random = 100*(time.tv_nsec%100)*1000000/bandwidth;
     return random;
 }
@@ -52,7 +52,7 @@ int mac_recv(struct sk_buff* skb,struct rx_hrtimer *rx_h,struct net_device *dev)
         ktime_t ktime = ns_to_ktime(skb_rx_time*1000);
         rx_h->skb = skb;
         hrtimer_start(&rx_h->hr_timer, ktime, HRTIMER_MODE_REL );
-        getnstimeofday(&stime);
+        ktime_get_ts64(&stime);
     }else{
         priv->rx_state = MAC_COLL; //set coll
         unsigned long time = txtime(skb,bandwidth);
@@ -65,7 +65,7 @@ int mac_recv(struct sk_buff* skb,struct rx_hrtimer *rx_h,struct net_device *dev)
             rx_h->skb = skb;
             skb_rx_time = time;
             ktime_t ktime = ns_to_ktime(skb_rx_time*1000);
-            getnstimeofday(&stime);
+            ktime_get_ts64(&stime);
             hrtimer_start(&rx_h->hr_timer, ktime, HRTIMER_MODE_REL);
             printk("<0>""RX_COLL \n");
         }else{

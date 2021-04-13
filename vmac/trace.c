@@ -35,8 +35,8 @@ void trace_init(){
 
 void send_event(struct sk_buff *skb){
     if(tx_n<10000){
-        struct timespec time;
-        getnstimeofday(&time);
+        struct timespec64 time;
+        ktime_get_ts64(&time);
         struct iphdr *ip_header = (struct iphdr *)skb_network_header(skb);
         struct trace_list *trace = kzalloc(sizeof(struct trace_list), GFP_KERNEL);
         trace->ip_src = (unsigned int)ip_header->saddr;
@@ -63,8 +63,8 @@ void send_event(struct sk_buff *skb){
 
 void resend_event(struct sk_buff *skb){
     if(tx_n<10000){
-        struct timespec time;
-        getnstimeofday(&time);
+        struct timespec64 time;
+        ktime_get_ts64(&time);
         struct iphdr *ip_header = (struct iphdr *)skb_network_header(skb);
         struct trace_list *trace = kzalloc(sizeof(struct trace_list), GFP_KERNEL);
         trace->ip_src = (unsigned int)ip_header->saddr;
@@ -91,8 +91,8 @@ void resend_event(struct sk_buff *skb){
 
 void recv_event(struct sk_buff *skb){
     if(rx_n<10000){
-        struct timespec time;
-        getnstimeofday(&time);
+        struct timespec64 time;
+        ktime_get_ts64(&time);
         struct iphdr *ip_header = (struct iphdr *)skb_network_header(skb);
         struct trace_list *trace = kzalloc(sizeof(struct trace_list), GFP_KERNEL);
         trace->ip_src = (unsigned int)ip_header->saddr;
@@ -118,8 +118,8 @@ void recv_event(struct sk_buff *skb){
 
 void enqueue_event(struct sk_buff *skb){
     if(tq_n<10000){
-        struct timespec time;
-        getnstimeofday(&time);
+        struct timespec64 time;
+        ktime_get_ts64(&time);
         struct iphdr *ip_header = (struct iphdr *)skb_network_header(skb);
         struct trace_list *trace = kzalloc(sizeof(struct trace_list), GFP_KERNEL);
         trace->ip_src = (unsigned int)ip_header->saddr;
@@ -146,8 +146,8 @@ void enqueue_event(struct sk_buff *skb){
 
 void dequeue_event(struct sk_buff *skb){
     if(tq_n<10000){
-        struct timespec time;
-        getnstimeofday(&time);
+        struct timespec64 time;
+        ktime_get_ts64(&time);
         struct iphdr *ip_header = (struct iphdr *)skb_network_header(skb);
         struct trace_list *trace = kzalloc(sizeof(struct trace_list), GFP_KERNEL);
         trace->ip_src = (unsigned int)ip_header->saddr;
@@ -174,8 +174,8 @@ void dequeue_event(struct sk_buff *skb){
 
 // void loss_event(struct sk_buff *skb){
 //     if(rx_n<10000){
-//         struct timespec time;
-//         getnstimeofday(&time);
+//         struct timespec64 time;
+//         ktime_get_ts64(&time);
 //         struct trace_list *trace = kzalloc(sizeof(struct trace_list), GFP_KERNEL);
 //         trace->no = rx_n;
 //         trace->event = LOSS;

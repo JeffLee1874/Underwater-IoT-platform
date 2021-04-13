@@ -40,7 +40,7 @@ struct vmac_ops *mac_ptc_ops;
 struct task_struct *task_p = NULL;
 struct tx_hrtimer *tx_h; 
 struct rx_hrtimer *rx_h;
-struct timespec time;
+struct timespec64 time;
 
 
 enum hrtimer_restart tx_hrtimer_callback( struct hrtimer *timer ) {
@@ -60,7 +60,7 @@ enum hrtimer_restart tx_hrtimer_callback( struct hrtimer *timer ) {
     dev_ens33->netdev_ops->ndo_start_xmit(skb,dev_ens33);
     priv->flag = 0;
     wake_up_process(task_p);
-    getnstimeofday(&time);
+    ktime_get_ts64(&time);
     printk("<0>""hrtimer callback:%llu sec, %lld ms, %lld ns,send a packet\n",
     (unsigned long long) time.tv_sec,(unsigned long long) time.tv_sec*1000 
     + time.tv_nsec/1000000 ,(long long)time.tv_nsec);
@@ -186,7 +186,7 @@ int vmac_tx(struct sk_buff *skb, struct net_device *dev){
     struct sk_buff **pskb = &skb;
     if(vmac_enqueue_buf(dev,pskb)==QUEUE_FULL){
         printk("<0>""TX Buffer not free!\n");
-        getnstimeofday(&time);
+        ktime_get_ts64(&time);
         printk("<0>""hrtimer:%9llu sec, %9lld ms, %9lld ns,send a packet\n",
         (unsigned long long) time.tv_sec,(unsigned long long) time.tv_sec*1000 
         + time.tv_nsec/1000000 ,(long long)time.tv_nsec);
