@@ -245,7 +245,7 @@ void vmac_rx( struct sk_buff *skb)
 }
 
 
-void vmac_tx_timeout (struct net_device *dev)
+void vmac_tx_timeout (struct net_device *dev， unsigned int n)
 {
     struct vmac_priv *priv = netdev_priv(dev);
     printk("<0>""Transmit timeout at %ld, latency %ld\n", jiffies,jiffies - netdev_get_tx_queue(dev,0)->trans_start);
